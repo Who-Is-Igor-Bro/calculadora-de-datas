@@ -1,0 +1,146 @@
+<!doctype html>
+
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Calculadora de Datas</title>
+  <style>
+    :root{--bg:#f6f8fb;--card:#fff;--accent:#2563eb;--muted:#6b7280}
+    body{font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+    .container{width:100%;max-width:720px;background:var(--card);border-radius:12px;box-shadow:0 6px 24px rgba(16,24,40,.08);padding:24px}
+    h1{margin:0 0 8px;font-size:20px}
+    p.lead{margin:0 0 18px;color:var(--muted)}
+    .row{display:flex;gap:12px;flex-wrap:wrap}
+    label{font-size:13px;color:#111827;margin-bottom:6px;display:block}
+    input[type="date"], input[type="number"], select{padding:10px 12px;border:1px solid #e6e9ef;border-radius:8px;font-size:15px}
+    .controls{display:flex;gap:8px;align-items:center;margin-top:6px}
+    button{background:var(--accent);color:#fff;border:0;padding:10px 14px;border-radius:10px;font-weight:600;cursor:pointer}
+    button.ghost{background:transparent;color:var(--accent);border:1px solid rgba(37,99,235,.14)}
+    .output{margin-top:18px;padding:14px;border-radius:10px;background:#f8fafc;border:1px solid #eef2ff}
+    .big{font-size:18px;font-weight:700}
+    .small{color:var(--muted);font-size:13px}
+    .actions{display:flex;gap:8px;margin-top:12px}
+    @media(max-width:520px){.row{flex-direction:column}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Calculadora de Datas</h1>
+    <p class="lead">Escolha uma data (ou use a data atual), digite quantos dias quer somar ou subtrair e veja o resultado.</p><div class="row">
+  <div style="flex:1;min-width:200px">
+    <label for="baseDate">Data base</label>
+    <input id="baseDate" type="date" aria-label="Data base">
+    <div class="controls">
+      <button id="useToday">Usar data atual</button>
+      <button id="clearDate" class="ghost">Limpar</button>
+    </div>
+  </div>
+
+  <div style="width:220px;min-width:160px">
+    <label for="days">Dias (use negativo para subtrair)</label>
+    <input id="days" type="number" value="0" step="1" aria-label="Dias a adicionar">
+  </div>
+
+  <div style="width:160px;min-width:120px">
+    <label for="calcBtn">Calcular</label>
+    <button id="calcBtn" style="width:100%">Calcular</button>
+  </div>
+</div>
+
+<div class="output" id="resultBox" aria-live="polite" hidden>
+  <div class="big" id="result">--</div>
+  <div class="small" id="iso">--</div>
+  <div class="actions">
+    <button id="copyBtn" class="ghost">Copiar resultado</button>
+    <button id="resetBtn" class="ghost">Resetar</button>
+  </div>
+</div>
+
+  </div>  <script>
+    // Utilitários
+    const $ = id => document.getElementById(id);
+    const monthsPT = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+    const weekdaysPT = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
+
+    function formatPT(date){
+      const d = date.getDate();
+      const m = monthsPT[date.getMonth()];
+      const y = date.getFullYear();
+      return `${d} de ${m} de ${y}`;
+    }
+
+    function formatBR(date){
+      const d = String(date.getDate()).padStart(2,'0');
+      const m = String(date.getMonth()+1).padStart(2,'0');
+      const y = date.getFullYear();
+      return `${d}/${m}/${y}`;
+    }
+
+    //function formatBR(date){
+    //return date.toISOString().slice(0,10);
+    }
+
+    // Elementos
+    const baseDate = $('baseDate');
+    const days = $('days');
+    const useToday = $('useToday');
+    const calcBtn = $('calcBtn');
+    const resultBox = $('resultBox');
+    const result = $('result');
+    const iso = $('iso');
+    const copyBtn = $('copyBtn');
+    const resetBtn = $('resetBtn');
+    const clearDate = $('clearDate');
+
+    // Ações
+    useToday.addEventListener('click', ()=>{
+      const today = new Date();
+      baseDate.value = today.toISOString().slice(0,10);
+    });
+
+    clearDate.addEventListener('click', ()=>{
+      baseDate.value = '';
+    });
+
+    calcBtn.addEventListener('click', ()=>{
+      const base = baseDate.value ? new Date(baseDate.value + 'T00:00:00') : new Date();
+      const daysToAdd = Number(days.value) || 0;
+
+      // cálculo robusto: criar nova data a partir de milissegundos
+      const resultDate = new Date(base.getTime() + daysToAdd * 24 * 60 * 60 * 1000);
+
+      result.textContent = formatPT(resultDate) + ' — ' + weekdaysPT[resultDate.getDay()];
+      iso.textContent = 'Formato BR: ' + formatBR(resultDate);
+      resultBox.hidden = false;
+
+      // foco para leitura por leitores de tela
+      resultBox.setAttribute('tabindex', '-1');
+      resultBox.focus();
+    });
+
+    copyBtn.addEventListener('click', async ()=>{
+      if (result.textContent && navigator.clipboard){
+        try{
+          await navigator.clipboard.writeText(result.textContent + ' (' + iso.textContent + ')');
+          copyBtn.textContent = 'Copiado!';
+          setTimeout(()=> copyBtn.textContent = 'Copiar resultado', 1200);
+        }catch(e){
+          alert('Não foi possível copiar automaticamente. Seleccione o texto e copie manualmente.');
+        }
+      }
+    });
+
+    resetBtn.addEventListener('click', ()=>{
+      baseDate.value = '';
+      days.value = '0';
+      resultBox.hidden = true;
+    });
+
+    // Enter na caixa de dias também calcula
+    days.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') calcBtn.click(); });
+
+    // Preencher com data atual ao carregar (opcional)
+    // baseDate.value = new Date().toISOString().slice(0,10);
+  </script></body>
+</html>
