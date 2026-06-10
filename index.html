@@ -1,146 +1,456 @@
 <!doctype html>
-
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Calculadora de Datas</title>
-  <style>
-    :root{--bg:#f6f8fb;--card:#fff;--accent:#2563eb;--muted:#6b7280}
-    body{font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
-    .container{width:100%;max-width:720px;background:var(--card);border-radius:12px;box-shadow:0 6px 24px rgba(16,24,40,.08);padding:24px}
-    h1{margin:0 0 8px;font-size:20px}
-    p.lead{margin:0 0 18px;color:var(--muted)}
-    .row{display:flex;gap:12px;flex-wrap:wrap}
-    label{font-size:13px;color:#111827;margin-bottom:6px;display:block}
-    input[type="date"], input[type="number"], select{padding:10px 12px;border:1px solid #e6e9ef;border-radius:8px;font-size:15px}
-    .controls{display:flex;gap:8px;align-items:center;margin-top:6px}
-    button{background:var(--accent);color:#fff;border:0;padding:10px 14px;border-radius:10px;font-weight:600;cursor:pointer}
-    button.ghost{background:transparent;color:var(--accent);border:1px solid rgba(37,99,235,.14)}
-    .output{margin-top:18px;padding:14px;border-radius:10px;background:#f8fafc;border:1px solid #eef2ff}
-    .big{font-size:18px;font-weight:700}
-    .small{color:var(--muted);font-size:13px}
-    .actions{display:flex;gap:8px;margin-top:12px}
-    @media(max-width:520px){.row{flex-direction:column}}
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Calculadora de Datas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#e7e4dc;
+    --surface:#fff;
+    --ink:#23242c;
+    --muted:#73767f;
+    --line:#e7e8ee;
+    --field:#f4f5f8;
+    --red:#d62839;
+    --red-soft:#fdecee;
+    --green:#0f9d70;
+    --green-soft:#e7f6f0;
+    --blue:#3457b2;
+    --blue-soft:#eaf0fb;
+    --shadow:0 10px 30px rgba(20,22,35,.10);
+    --r:16px;
+  }
+  *{box-sizing:border-box}
+  body{
+    font-family:Inter,system-ui,sans-serif;
+    background:radial-gradient(1200px 500px at 100% -10%,#efece4 0,transparent 60%),var(--bg);
+    color:var(--ink);margin:0;min-height:100vh;
+    display:flex;align-items:flex-start;justify-content:center;
+    padding:32px 18px 56px;
+  }
+  .app{width:100%;max-width:760px}
+  .eyebrow{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:6px}
+  h1{font-family:Oswald,sans-serif;font-weight:600;margin:0;font-size:34px;line-height:1.05}
+  h1 .acc{color:var(--red)}
+  .lead{margin:8px 0 22px;color:var(--muted);font-size:15px;max-width:56ch}
+
+  /* --- seção separadora --- */
+  .section-label{
+    display:flex;align-items:center;gap:10px;
+    font-size:11.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--muted);margin:28px 0 12px;
+  }
+  .section-label::after{content:"";flex:1;height:1px;background:var(--line)}
+
+  /* --- card --- */
+  .card{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);border:1px solid rgba(20,22,35,.04);padding:22px}
+
+  label{font-size:12.5px;font-weight:600;color:var(--ink);margin-bottom:7px;display:block}
+  input[type="date"],input[type="number"]{
+    width:100%;padding:12px 13px;border:1px solid var(--line);border-radius:11px;
+    font-size:16px;font-family:inherit;background:var(--field);color:var(--ink);
+    transition:border-color .15s,box-shadow .15s;
+  }
+  input:focus{outline:none;border-color:var(--ink);box-shadow:0 0 0 3px rgba(35,36,44,.10);background:#fff}
+
+  .row{display:grid;grid-template-columns:1fr 200px;gap:16px}
+  .row3{display:grid;grid-template-columns:1fr 160px auto;gap:14px;align-items:end}
+
+  button{font-family:inherit;cursor:pointer;border:0;font-weight:600;border-radius:11px;transition:transform .06s,background .15s,color .15s,border-color .15s}
+  button:active{transform:translateY(1px)}
+  .btn{background:var(--ink);color:#fff;padding:12px 16px;font-size:15px}
+  .btn:hover{background:#000}
+  .btn-full{width:100%;min-height:48px;font-size:16px;margin-top:16px}
+  .link{background:transparent;color:var(--ink);border:1px solid var(--line);padding:9px 12px;font-size:13.5px}
+  .link:hover{border-color:var(--ink)}
+  .chip{background:var(--field);color:var(--ink);border:1px solid var(--line);padding:7px 11px;font-size:13px;border-radius:999px;font-weight:600}
+  .chip:hover{border-color:var(--ink)}
+  .fc{display:flex;gap:8px;margin-top:9px;flex-wrap:wrap}
+
+  /* --- resultado a --- */
+  .result{margin-top:18px;display:none}
+  .result.show{display:block;animation:rise .32s cubic-bezier(.2,.7,.3,1)}
+  @keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  .sheet{overflow:hidden;border-radius:var(--r);box-shadow:var(--shadow)}
+  .sheet-top{
+    background:var(--ink);color:#fff;padding:13px 20px;
+    display:flex;justify-content:space-between;align-items:center;
+    font-family:Oswald,sans-serif;letter-spacing:.06em;text-transform:uppercase;
+  }
+  .sheet-top.hol{background:var(--red)}
+  .sheet-top .mo{font-size:18px;font-weight:600}
+  .sheet-top .yr{font-size:15px;opacity:.85}
+  .sheet-body{padding:22px 20px;display:flex;gap:22px;align-items:center;flex-wrap:wrap;background:var(--surface)}
+  .daynum{font-family:Oswald,sans-serif;font-size:92px;line-height:.82;font-weight:700;color:var(--ink)}
+  .daynum.hol{color:var(--red)}
+  .meta{flex:1;min-width:190px}
+  .weekday{font-family:Oswald,sans-serif;font-size:24px;font-weight:500;text-transform:capitalize}
+  .fulldate{color:var(--muted);font-size:14px;margin-top:2px}
+  .badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}
+  .badge{font-size:12.5px;font-weight:700;padding:6px 11px;border-radius:999px;display:inline-flex;align-items:center;gap:6px}
+  .badge .dot{width:7px;height:7px;border-radius:50%}
+  .b-h{background:var(--red-soft);color:var(--red)}.b-h .dot{background:var(--red)}
+  .b-w{background:var(--blue-soft);color:var(--blue)}.b-w .dot{background:var(--blue)}
+  .b-u{background:var(--green-soft);color:var(--green)}.b-u .dot{background:var(--green)}
+
+  .sheet-foot{border-top:1px dashed var(--line);padding:13px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;background:var(--surface)}
+  .spread{color:var(--muted);font-size:13.5px}
+  .spread b{color:var(--ink)}
+  .foot-act{display:flex;gap:8px}
+
+  .err{display:none;margin-top:14px;background:var(--red-soft);color:var(--red);border-radius:11px;padding:12px 14px;font-size:14px;font-weight:600}
+  .err.show{display:block}
+
+  /* --- resultado meses (mini) --- */
+  .mini-result{display:none;margin-top:18px;animation:rise .32s cubic-bezier(.2,.7,.3,1)}
+  .mini-result.show{display:block}
+  .mini{overflow:hidden;border-radius:var(--r);box-shadow:var(--shadow)}
+  .mini-top{background:var(--ink);color:#fff;padding:11px 18px;font-family:Oswald,sans-serif;text-transform:uppercase;letter-spacing:.07em;font-size:14px;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+  .mini-top.hol{background:var(--red)}
+  .mini-body{padding:18px 18px 16px;background:var(--surface);display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+  .mini-day{font-family:Oswald,sans-serif;font-size:64px;line-height:.82;font-weight:700;color:var(--ink)}
+  .mini-day.hol{color:var(--red)}
+  .mini-meta{flex:1;min-width:160px}
+  .mini-wday{font-family:Oswald,sans-serif;font-size:18px;font-weight:500;text-transform:capitalize}
+  .mini-full{color:var(--muted);font-size:13px;margin-top:2px}
+  .mini-badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .mini-foot{border-top:1px dashed var(--line);padding:11px 18px;background:var(--surface);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+  .mini-info{color:var(--muted);font-size:13px}
+  .mini-info b{color:var(--ink)}
+
+  .note{color:var(--muted);font-size:12px;margin:18px 4px 0;line-height:1.6}
+
+  @media(max-width:560px){
+    .row,.row3{grid-template-columns:1fr}
+    .daynum{font-size:72px}
+    .mini-day{font-size:52px}
+    h1{font-size:28px}
+  }
+  @media(prefers-reduced-motion:reduce){
+    .result.show,.mini-result.show{animation:none}
+    button:active{transform:none}
+  }
+</style>
 </head>
 <body>
-  <div class="container">
-    <h1>Calculadora de Datas</h1>
-    <p class="lead">Escolha uma data (ou use a data atual), digite quantos dias quer somar ou subtrair e veja o resultado.</p><div class="row">
-  <div style="flex:1;min-width:200px">
-    <label for="baseDate">Data base</label>
-    <input id="baseDate" type="date" aria-label="Data base">
-    <div class="controls">
-      <button id="useToday">Usar data atual</button>
-      <button id="clearDate" class="ghost">Limpar</button>
+<div class="app">
+
+  <div class="eyebrow">Calculadora de datas</div>
+  
+
+  <!-- ====== BLOCO 1: DIAS ====== -->
+  <div class="section-label">Calcular por dias</div>
+
+  <div class="card">
+    <div class="row">
+      <div>
+        <label for="baseDate">Data base</label>
+        <input id="baseDate" type="date" />
+        <div class="fc">
+          <button class="link" id="useToday">Usar hoje</button>
+          <button class="link" id="clearDate">Limpar</button>
+        </div>
+      </div>
+      <div>
+        <label for="days">Dias (negativo subtrai)</label>
+        <input id="days" type="number" value="0" step="1" inputmode="numeric" />
+        <div class="fc" id="chips">
+          <button class="chip" data-add="7">+7</button>
+          <button class="chip" data-add="15">+15</button>
+          <button class="chip" data-add="30">+30</button>
+          <button class="chip" data-add="-1">−1</button>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-full" id="calcBtn">Calcular dias</button>
+    <div class="err" id="errD"></div>
+  </div>
+
+  <div class="result" id="resultD">
+    <div class="sheet">
+      <div class="sheet-top" id="dTop">
+        <span class="mo" id="dMonth">—</span>
+        <span class="yr" id="dYear">—</span>
+      </div>
+      <div class="sheet-body">
+        <div class="daynum" id="dDay">—</div>
+        <div class="meta">
+          <div class="weekday" id="dWeekday">—</div>
+          <div class="fulldate" id="dFull">—</div>
+          <div class="badges" id="dBadges"></div>
+        </div>
+      </div>
+      <div class="sheet-foot">
+        <div class="spread" id="dSpread"></div>
+        <div class="foot-act">
+          <button class="link" id="dCopy">Copiar</button>
+          <button class="link" id="dReset">Resetar</button>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div style="width:220px;min-width:160px">
-    <label for="days">Dias (use negativo para subtrair)</label>
-    <input id="days" type="number" value="0" step="1" aria-label="Dias a adicionar">
+  <!-- ====== BLOCO 2: MESES ====== -->
+  <div class="section-label">Calcular por meses</div>
+
+  <div class="card">
+    <div class="row3">
+      <div>
+        <label for="mBase">Data base</label>
+        <input id="mBase" type="date" />
+        <div class="fc">
+          <button class="link" id="mUseToday">Usar hoje</button>
+          <button class="link" id="mClear">Limpar</button>
+        </div>
+      </div>
+      <div>
+        <label for="months">Meses (negativo subtrai)</label>
+        <input id="months" type="number" value="3" step="1" min="-999" max="999" inputmode="numeric" />
+        <div class="fc" id="mchips">
+          <button class="chip" data-madd="1">+1</button>
+          <button class="chip" data-madd="3">+3</button>
+          <button class="chip" data-madd="6">+6</button>
+          <button class="chip" data-madd="12">+12</button>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-full" id="mCalcBtn">Calcular meses</button>
+    <div class="err" id="errM"></div>
   </div>
 
-  <div style="width:160px;min-width:120px">
-    <label for="calcBtn">Calcular</label>
-    <button id="calcBtn" style="width:100%">Calcular</button>
+  <div class="mini-result" id="resultM">
+    <div class="mini">
+      <div class="mini-top" id="mTop">
+        <span id="mMonthLabel">—</span>
+        <span id="mYearLabel">—</span>
+      </div>
+      <div class="mini-body">
+        <div class="mini-day" id="mDayNum">—</div>
+        <div class="mini-meta">
+          <div class="mini-wday" id="mWday">—</div>
+          <div class="mini-full" id="mFull">—</div>
+          <div class="mini-badges" id="mBadges"></div>
+        </div>
+      </div>
+      <div class="mini-foot">
+        <div class="mini-info" id="mInfo"></div>
+        <div class="foot-act">
+          <button class="link" id="mCopy">Copiar</button>
+          <button class="link" id="mReset">Resetar</button>
+        </div>
+      </div>
+    </div>
   </div>
+
+  <p class="note">Sistema só indentifica feriados nacionais, Pascoa etc</p>
 </div>
 
-<div class="output" id="resultBox" aria-live="polite" hidden>
-  <div class="big" id="result">--</div>
-  <div class="small" id="iso">--</div>
-  <div class="actions">
-    <button id="copyBtn" class="ghost">Copiar resultado</button>
-    <button id="resetBtn" class="ghost">Resetar</button>
-  </div>
-</div>
+<script>
+"use strict";
+const $  = id => document.getElementById(id);
+const MONTHS   = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+const WEEKDAYS = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
 
-  </div>  <script>
-    // Utilitários
-    const $ = id => document.getElementById(id);
-    const monthsPT = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
-    const weekdaysPT = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
+/* ---- Páscoa (algoritmo gregoriano anônimo) ---- */
+function easter(y){
+  const a=y%19,b=(y/100)|0,c=y%100,d=(b/4)|0,e=b%4,
+        f=((b+8)/25)|0,g=((b-f+1)/3)|0,h=(19*a+b-d-g+15)%30,
+        i=(c/4)|0,k=c%4,l=(32+2*e+2*i-h-k)%7,m=((a+11*h+22*l)/451)|0,
+        mo=((h+l-7*m+114)/31)|0,dy=((h+l-7*m+114)%31)+1;
+  return new Date(y,mo-1,dy);
+}
 
-    function formatPT(date){
-      const d = date.getDate();
-      const m = monthsPT[date.getMonth()];
-      const y = date.getFullYear();
-      return `${d} de ${m} de ${y}`;
-    }
+/* ---- feriados ---- */
+const hCache={};
+function holidaysOf(y){
+  if(hCache[y]) return hCache[y];
+  const E=easter(y), sh=n=>new Date(y,E.getMonth(),E.getDate()+n);
+  const map={}, k=dt=>dt.getMonth()*100+dt.getDate();
+  const add=(dt,nm)=>{map[k(dt)]=nm};
+  add(new Date(y,0,1),  'Confraternização Universal');
+  add(new Date(y,3,21), 'Tiradentes');
+  add(new Date(y,4,1),  'Dia do Trabalho');
+  add(new Date(y,8,7),  'Independência do Brasil');
+  add(new Date(y,9,12), 'Nossa Senhora Aparecida');
+  add(new Date(y,10,2), 'Finados');
+  add(new Date(y,10,15),'Proclamação da República');
+  add(new Date(y,10,20),'Consciência Negra');
+  add(new Date(y,11,25),'Natal');
+  add(sh(-47),'Carnaval');
+  add(sh(-2), 'Sexta-feira Santa');
+  add(sh(60), 'Corpus Christi');
+  return hCache[y]=map;
+}
+const hKey    = dt => dt.getMonth()*100+dt.getDate();
+const hName   = dt => holidaysOf(dt.getFullYear())[hKey(dt)]||null;
+const isWE    = dt => dt.getDay()===0||dt.getDay()===6;
 
-    function formatBR(date){
-      const d = String(date.getDate()).padStart(2,'0');
-      const m = String(date.getMonth()+1).padStart(2,'0');
-      const y = date.getFullYear();
-      return `${d}/${m}/${y}`;
-    }
+/* ---- aritmética de data (segura, sem fuso) ---- */
+const addDays = (dt,n) => new Date(dt.getFullYear(),dt.getMonth(),dt.getDate()+n);
+function addMonths(dt,n){
+  const day=dt.getDate();
+  const t=new Date(dt.getFullYear(),dt.getMonth()+n,1);
+  t.setDate(Math.min(day,new Date(t.getFullYear(),t.getMonth()+1,0).getDate()));
+  return t;
+}
 
-    //function formatBR(date){
-    //return date.toISOString().slice(0,10);
-   // }
+/* ---- formatação ---- */
+const pad  = n => String(n).padStart(2,'0');
+const fmtBR   = dt => `${pad(dt.getDate())}/${pad(dt.getMonth()+1)}/${dt.getFullYear()}`;
+const fmtLong = dt => `${dt.getDate()} de ${MONTHS[dt.getMonth()]} de ${dt.getFullYear()}`;
+const toInput = dt => `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}`;
 
-    // Elementos
-    const baseDate = $('baseDate');
-    const days = $('days');
-    const useToday = $('useToday');
-    const calcBtn = $('calcBtn');
-    const resultBox = $('resultBox');
-    const result = $('result');
-    const iso = $('iso');
-    const copyBtn = $('copyBtn');
-    const resetBtn = $('resetBtn');
-    const clearDate = $('clearDate');
+/* ---- classificação ---- */
+function classify(dt){
+  const h=hName(dt);
+  if(h) return {type:'h',label:'Feriado · '+h};
+  if(isWE(dt)) return {type:'w',label:'Fim de semana'};
+  return {type:'u',label:'Dia útil'};
+}
+const badgeHTML = c => `<span class="badge b-${c.type}"><span class="dot"></span>${c.label}</span>`;
 
-    // Ações
-    useToday.addEventListener('click', ()=>{
-      const today = new Date();
-      baseDate.value = today.toISOString().slice(0,10);
-    });
+/* ---- dias úteis entre duas datas ---- */
+function bizDays(a,b){
+  if(a.getTime()===b.getTime()) return 0;
+  const sign=b>a?1:-1; let cnt=0,cur=addDays(a,sign);
+  while(true){
+    if(!isWE(cur)&&!hName(cur)) cnt++;
+    if(cur.getTime()===b.getTime()) break;
+    cur=addDays(cur,sign);
+  }
+  return cnt*sign;
+}
 
-    clearDate.addEventListener('click', ()=>{
-      baseDate.value = '';
-    });
+/* ---- leitura da data dos campos ---- */
+function readDate(inputId){
+  const v=$( inputId).value;
+  if(v){const[y,m,d]=v.split('-').map(Number);return new Date(y,m-1,d);}
+  const t=new Date();return new Date(t.getFullYear(),t.getMonth(),t.getDate());
+}
 
-    calcBtn.addEventListener('click', ()=>{
-      const base = baseDate.value ? new Date(baseDate.value + 'T00:00:00') : new Date();
-      const daysToAdd = Number(days.value) || 0;
+/* ============================================================
+   BLOCO 1 — DIAS
+   ============================================================ */
+$('useToday').addEventListener('click',()=>{ $('baseDate').value=toInput(new Date()); });
+$('clearDate').addEventListener('click',()=>{ $('baseDate').value=''; });
 
-      // cálculo robusto: criar nova data a partir de milissegundos
-      const resultDate = new Date(base.getTime() + daysToAdd * 24 * 60 * 60 * 1000);
+$('chips').addEventListener('click',e=>{
+  const b=e.target.closest('[data-add]'); if(!b)return;
+  $('days').value=(Number($('days').value)||0)+Number(b.dataset.add);
+  calcDays();
+});
 
-      result.textContent = formatPT(resultDate) + ' — ' + weekdaysPT[resultDate.getDay()];
-      iso.textContent = 'Formato BR: ' + formatBR(resultDate);
-      resultBox.hidden = false;
+function calcDays(){
+  const n=Number($('days').value);
+  if(!Number.isFinite(n)||!Number.isInteger(n)){
+    $('errD').textContent='Digite um número inteiro (ex.: 30 ou −15).';
+    $('errD').classList.add('show'); $('resultD').classList.remove('show'); return;
+  }
+  $('errD').classList.remove('show');
+  const base=readDate('baseDate');
+  if(!$('baseDate').value) $('baseDate').value=toInput(base);
+  const res=addDays(base,n), c=classify(res);
 
-      // foco para leitura por leitores de tela
-      resultBox.setAttribute('tabindex', '-1');
-      resultBox.focus();
-    });
+  $('dTop').classList.toggle('hol',c.type==='h');
+  $('dDay').classList.toggle('hol',c.type==='h');
+  $('dMonth').textContent=MONTHS[res.getMonth()];
+  $('dYear').textContent=res.getFullYear();
+  $('dDay').textContent=res.getDate();
+  $('dWeekday').textContent=WEEKDAYS[res.getDay()];
+  $('dFull').textContent=fmtLong(res)+' · '+fmtBR(res);
+  $('dBadges').innerHTML=badgeHTML(c);
 
-    copyBtn.addEventListener('click', async ()=>{
-      if (result.textContent && navigator.clipboard){
-        try{
-          await navigator.clipboard.writeText(result.textContent + ' (' + iso.textContent + ')');
-          copyBtn.textContent = 'Copiado!';
-          setTimeout(()=> copyBtn.textContent = 'Copiar resultado', 1200);
-        }catch(e){
-          alert('Não foi possível copiar automaticamente. Seleccione o texto e copie manualmente.');
-        }
-      }
-    });
+  if(n===0){
+    $('dSpread').innerHTML='Mesma data base.';
+  } else {
+    const dir=n>0?'depois':'antes';
+    const bus=Math.abs(bizDays(base,res));
+    $('dSpread').innerHTML=`<b>${Math.abs(n)}</b> dia(s) corrido(s) ${dir} · <b>${bus}</b> útil(eis)`;
+  }
+  $('resultD').classList.add('show');
+}
 
-    resetBtn.addEventListener('click', ()=>{
-      baseDate.value = '';
-      days.value = '0';
-      resultBox.hidden = true;
-    });
+$('calcBtn').addEventListener('click',calcDays);
+$('days').addEventListener('keydown',e=>{ if(e.key==='Enter') calcDays(); });
+$('baseDate').addEventListener('keydown',e=>{ if(e.key==='Enter') calcDays(); });
 
-    // Enter na caixa de dias também calcula
-    days.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') calcBtn.click(); });
+$('dCopy').addEventListener('click',async()=>{
+  const txt=`${$('dFull').textContent} — ${$('dWeekday').textContent}\n${$('dBadges').textContent.trim()}`;
+  try{
+    await navigator.clipboard.writeText(txt);
+    $('dCopy').textContent='Copiado!'; setTimeout(()=>$('dCopy').textContent='Copiar',1200);
+  }catch{ alert('Selecione o texto e copie manualmente.'); }
+});
 
-    // Preencher com data atual ao carregar (opcional)
-    // baseDate.value = new Date().toISOString().slice(0,10);
-  </script></body>
+$('dReset').addEventListener('click',()=>{
+  $('baseDate').value=''; $('days').value='0';
+  $('resultD').classList.remove('show'); $('errD').classList.remove('show');
+});
+
+/* ============================================================
+   BLOCO 2 — MESES
+   ============================================================ */
+$('mUseToday').addEventListener('click',()=>{ $('mBase').value=toInput(new Date()); });
+$('mClear').addEventListener('click',()=>{ $('mBase').value=''; });
+
+$('mchips').addEventListener('click',e=>{
+  const b=e.target.closest('[data-madd]'); if(!b)return;
+  $('months').value=(Number($('months').value)||0)+Number(b.dataset.madd);
+  calcMonths();
+});
+
+function calcMonths(){
+  const n=Number($('months').value);
+  if(!Number.isFinite(n)||!Number.isInteger(n)||n===0){
+    $('errM').textContent='Digite um número inteiro diferente de zero (ex.: 3 ou −6).';
+    $('errM').classList.add('show'); $('resultM').classList.remove('show'); return;
+  }
+  $('errM').classList.remove('show');
+  const base=readDate('mBase');
+  if(!$('mBase').value) $('mBase').value=toInput(base);
+  const res=addMonths(base,n), c=classify(res);
+
+  $('mTop').classList.toggle('hol',c.type==='h');
+  $('mDayNum').classList.toggle('hol',c.type==='h');
+  $('mMonthLabel').textContent=MONTHS[res.getMonth()];
+  $('mYearLabel').textContent=res.getFullYear();
+  $('mDayNum').textContent=res.getDate();
+  $('mWday').textContent=WEEKDAYS[res.getDay()];
+  $('mFull').textContent=fmtLong(res)+' · '+fmtBR(res);
+  $('mBadges').innerHTML=badgeHTML(c);
+
+  const dir=n>0?'depois':'antes';
+  $('mInfo').innerHTML=`<b>${Math.abs(n)}</b> mês(es) ${dir} da data base`;
+
+  $('resultM').classList.add('show');
+}
+
+$('mCalcBtn').addEventListener('click',calcMonths);
+$('months').addEventListener('keydown',e=>{ if(e.key==='Enter') calcMonths(); });
+$('mBase').addEventListener('keydown',e=>{ if(e.key==='Enter') calcMonths(); });
+
+$('mCopy').addEventListener('click',async()=>{
+  const txt=`${$('mFull').textContent} — ${$('mWday').textContent}\n${$('mBadges').textContent.trim()}`;
+  try{
+    await navigator.clipboard.writeText(txt);
+    $('mCopy').textContent='Copiado!'; setTimeout(()=>$('mCopy').textContent='Copiar',1200);
+  }catch{ alert('Selecione o texto e copie manualmente.'); }
+});
+
+$('mReset').addEventListener('click',()=>{
+  $('mBase').value=''; $('months').value='3';
+  $('resultM').classList.remove('show'); $('errM').classList.remove('show');
+});
+
+/* ---- início: preenche as duas datas com hoje ---- */
+const today = toInput(new Date());
+$('baseDate').value = today;
+$('mBase').value    = today;
+</script>
+</body>
 </html>
